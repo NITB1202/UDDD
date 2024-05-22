@@ -13,8 +13,10 @@ import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.material3.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,6 +26,8 @@ import com.example.uddd.Adapters.ResultAdapter
 import com.example.uddd.Domains.PopularDomain
 import com.example.uddd.Models.PlacesInfo
 import com.example.uddd.R
+import com.google.gson.Gson
+import com.google.gson.JsonElement
 import com.mapbox.android.gestures.MoveGestureDetector
 import com.mapbox.geojson.Point
 import com.mapbox.maps.CameraOptions
@@ -34,6 +38,8 @@ import com.mapbox.maps.plugin.LocationPuck2D
 import com.mapbox.maps.plugin.annotation.AnnotationConfig
 import com.mapbox.maps.plugin.annotation.AnnotationPlugin
 import com.mapbox.maps.plugin.annotation.annotations
+import com.mapbox.maps.plugin.annotation.generated.OnPointAnnotationClickListener
+import com.mapbox.maps.plugin.annotation.generated.PointAnnotation
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationManager
 import com.mapbox.maps.plugin.annotation.generated.PointAnnotationOptions
 import com.mapbox.maps.plugin.annotation.generated.createPointAnnotationManager
@@ -42,6 +48,7 @@ import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorBearingChangedListener
 import com.mapbox.maps.plugin.locationcomponent.OnIndicatorPositionChangedListener
 import com.mapbox.maps.plugin.locationcomponent.location
+import org.json.JSONObject
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -57,7 +64,11 @@ class ResultActivity : AppCompatActivity()
     var annotationapi: AnnotationPlugin?=null
     var layIDD="Map_annotation"
     var pointAnnotationManager : PointAnnotationManager?=null
-    var markerlist:ArrayList<PointAnnotationOptions> = ArrayList();
+    var markerlistCoffee:ArrayList<PointAnnotationOptions> = ArrayList();
+    var markerlistFoodAndDrink:ArrayList<PointAnnotationOptions> = ArrayList();
+    var markerlistRestaurant:ArrayList<PointAnnotationOptions> = ArrayList();
+    var markerlistShopping:ArrayList<PointAnnotationOptions> = ArrayList();
+    var markerlistHotel:ArrayList<PointAnnotationOptions> = ArrayList();
     val nameCategoryList = arrayListOf<String>("coffee", "food_and_drink","shopping","hotel","restaurant","restaurant")
 
     private var searchLocation: String? = null
@@ -145,12 +156,18 @@ class ResultActivity : AppCompatActivity()
             layerId = layIDD
         )
         pointAnnotationManager = annotationapi?.createPointAnnotationManager(annotationConfig);
+        pointAnnotationManager?.addClickListener(OnPointAnnotationClickListener {
+            annotation:PointAnnotation ->
+            onMarkerItemClick(annotation)
+            true
+        })
         val bitmap = convertDrawToBitmap(
             AppCompatResources.getDrawable(
                 this@ResultActivity,
                 R.drawable.baseline_location_on_24
             )
         )
+
         for (i in 0..5) {
             val filterId = getResources().getIdentifier("filter" + (i + 1), "id", packageName)
             val button = findViewById<ToggleButton>(filterId)
@@ -166,7 +183,7 @@ class ResultActivity : AppCompatActivity()
                                     key,
                                     "en",
                                     10,
-                                    "106.7004,10.7757"
+                                    "107.1362,10.4114"
                                 )
 
                             call.enqueue(object : Callback<PlacesInfo?> {
@@ -181,19 +198,20 @@ class ResultActivity : AppCompatActivity()
                                         val latitude =
                                             info.features[i].properties.coordinates.latitude
                                         string += longitude.toString() + "," + latitude.toString()
-
-
-
+                                        val jsonObject= JSONObject();
+                                        jsonObject.put("Name: ",info.features[i].properties.name)
                                         val pointAnnotationOptions: PointAnnotationOptions =
                                             PointAnnotationOptions().withPoint(
                                                 Point.fromLngLat(longitude, latitude)
-                                            ).withIconImage(bitmap)
-                                        markerlist.add(pointAnnotationOptions)
+                                            )
+                                                .withData(Gson().fromJson(jsonObject.toString(),JsonElement::class.java))
+                                                .withIconImage(bitmap)
+                                        markerlistCoffee.add(pointAnnotationOptions)
 
 
                                     }
 
-                                    pointAnnotationManager?.create(markerlist);
+                                    pointAnnotationManager?.create(markerlistCoffee);
 
 
                                 }
@@ -225,7 +243,7 @@ class ResultActivity : AppCompatActivity()
                                     key,
                                     "en",
                                     10,
-                                    "106.7004,10.7757"
+                                    "107.1362,10.4114"
                                 )
 
                             call.enqueue(object : Callback<PlacesInfo?> {
@@ -240,17 +258,21 @@ class ResultActivity : AppCompatActivity()
                                         val latitude =
                                             info.features[i].properties.coordinates.latitude
                                         string += longitude.toString() + "," + latitude.toString()
+                                        val jsonObject= JSONObject();
+                                        jsonObject.put("Name: ",info.features[i].properties.name)
 
                                         val pointAnnotationOptions: PointAnnotationOptions =
                                             PointAnnotationOptions().withPoint(
                                                 Point.fromLngLat(longitude, latitude)
-                                            ).withIconImage(bitmap)
-                                        markerlist.add(pointAnnotationOptions)
+                                            )
+                                                .withData(Gson().fromJson(jsonObject.toString(),JsonElement::class.java))
+                                                .withIconImage(bitmap)
+                                        markerlistFoodAndDrink.add(pointAnnotationOptions)
 
 
                                     }
                                     Toast.makeText(this@ResultActivity, "hello", Toast.LENGTH_SHORT).show()
-                                    pointAnnotationManager?.create(markerlist);
+                                    pointAnnotationManager?.create(markerlistFoodAndDrink);
 
 
                                 }
@@ -282,7 +304,7 @@ class ResultActivity : AppCompatActivity()
                                     key,
                                     "en",
                                     10,
-                                    "106.7004,10.7757"
+                                    "107.1362,10.4114"
                                 )
 
                             call.enqueue(object : Callback<PlacesInfo?> {
@@ -297,19 +319,23 @@ class ResultActivity : AppCompatActivity()
                                         val latitude =
                                             info.features[i].properties.coordinates.latitude
                                         string += longitude.toString() + "," + latitude.toString()
+                                        val jsonObject= JSONObject();
+                                        jsonObject.put("Name: ",info.features[i].properties.name)
 
 
 
                                         val pointAnnotationOptions: PointAnnotationOptions =
                                             PointAnnotationOptions().withPoint(
                                                 Point.fromLngLat(longitude, latitude)
-                                            ).withIconImage(bitmap)
-                                        markerlist.add(pointAnnotationOptions)
+                                            ).withData(Gson().fromJson(jsonObject.toString(),JsonElement::class.java))
+                                                .withIconImage(bitmap)
+                                        markerlistShopping.add(pointAnnotationOptions)
+
 
 
                                     }
                                     Toast.makeText(this@ResultActivity, "hello", Toast.LENGTH_SHORT).show()
-                                    pointAnnotationManager?.create(markerlist);
+                                    pointAnnotationManager?.create(markerlistShopping);
 
 
                                 }
@@ -341,7 +367,7 @@ class ResultActivity : AppCompatActivity()
                                     key,
                                     "en",
                                     10,
-                                    "106.7004,10.7757"
+                                    "107.1362,10.4114"
                                 )
 
                             call.enqueue(object : Callback<PlacesInfo?> {
@@ -356,19 +382,22 @@ class ResultActivity : AppCompatActivity()
                                         val latitude =
                                             info.features[i].properties.coordinates.latitude
                                         string += longitude.toString() + "," + latitude.toString()
+                                        val jsonObject= JSONObject();
+                                        jsonObject.put("Name: ",info.features[i].properties.name)
 
 
 
                                         val pointAnnotationOptions: PointAnnotationOptions =
                                             PointAnnotationOptions().withPoint(
                                                 Point.fromLngLat(longitude, latitude)
-                                            ).withIconImage(bitmap)
-                                        markerlist.add(pointAnnotationOptions)
+                                            ).withData(Gson().fromJson(jsonObject.toString(),JsonElement::class.java))
+                                                .withIconImage(bitmap)
+                                        markerlistHotel.add(pointAnnotationOptions)
 
 
                                     }
                                     Toast.makeText(this@ResultActivity, "hello", Toast.LENGTH_SHORT).show()
-                                    pointAnnotationManager?.create(markerlist);
+                                    pointAnnotationManager?.create(markerlistHotel);
 
 
                                 }
@@ -400,7 +429,7 @@ class ResultActivity : AppCompatActivity()
                                     key,
                                     "en",
                                     10,
-                                    "106.7004,10.7757"
+                                    "107.1362,10.4114"
                                 )
 
                             call.enqueue(object : Callback<PlacesInfo?> {
@@ -415,19 +444,22 @@ class ResultActivity : AppCompatActivity()
                                         val latitude =
                                             info.features[i].properties.coordinates.latitude
                                         string += longitude.toString() + "," + latitude.toString()
+                                        val jsonObject= JSONObject();
+                                        jsonObject.put("Name: ",info.features[i].properties.name)
 
 
 
                                         val pointAnnotationOptions: PointAnnotationOptions =
                                             PointAnnotationOptions().withPoint(
                                                 Point.fromLngLat(longitude, latitude)
-                                            ).withIconImage(bitmap)
-                                        markerlist.add(pointAnnotationOptions)
+                                            ).withData(Gson().fromJson(jsonObject.toString(),JsonElement::class.java))
+                                                .withIconImage(bitmap)
+                                        markerlistRestaurant.add(pointAnnotationOptions)
 
 
                                     }
                                     Toast.makeText(this@ResultActivity, "hello", Toast.LENGTH_SHORT).show()
-                                    pointAnnotationManager?.create(markerlist);
+                                    pointAnnotationManager?.create(markerlistRestaurant);
 
 
                                 }
@@ -454,6 +486,16 @@ class ResultActivity : AppCompatActivity()
 
 
     }
+    private fun onMarkerItemClick(marker:PointAnnotation){
+        var jsonElement:JsonElement?= marker.getData()
+        AlertDialog.Builder(this).setTitle("Info place")
+            .setMessage(jsonElement.toString())
+            .setPositiveButton("Ok"){
+                dialog,whichButton -> dialog.dismiss()
+            
+        }.show()
+    }
+
     private fun convertDrawToBitmap(sourceDrawable :Drawable?): Bitmap{
 
         return if(sourceDrawable is BitmapDrawable){
