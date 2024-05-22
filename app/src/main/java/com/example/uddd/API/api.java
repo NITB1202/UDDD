@@ -124,6 +124,14 @@ public interface api {
     Call<ArrayList<PopularDomain>> getVungTauFood();
     @GET("/api/getVungtauShop")
     Call<ArrayList<PopularDomain>> getVungTauShop();
-
+    @GET("/api/getFavourite")
+    Call<ArrayList<PopularDomain>> getFavour(
+            @Query("id") int userID
+    );
+    @POST("/api/addFavourite")
+    Call<Void> addFavour(
+            @Query("userID") int userID,
+            @Query("locationID") int locationID
+    );
 
 }

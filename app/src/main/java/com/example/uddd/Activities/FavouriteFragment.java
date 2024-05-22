@@ -17,18 +17,24 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.uddd.API.RetrofitClient;
 import com.example.uddd.Adapters.PopularAdapter;
 import com.example.uddd.Adapters.SavedAdapter;
 import com.example.uddd.Domains.PopularDomain;
 import com.example.uddd.Domains.SavedDomain;
+import com.example.uddd.Models.User;
 import com.example.uddd.R;
 
 import java.util.ArrayList;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class FavouriteFragment extends Fragment {
-    PopularAdapter favouriteAdapter;
-    SavedAdapter savedLocationAdapter;
-    RecyclerView recyclerView;
+    static PopularAdapter favouriteAdapter;
+    static SavedAdapter savedLocationAdapter;
+    static RecyclerView recyclerView;
     ImageButton addButton;
 
     @Override
@@ -37,18 +43,16 @@ public class FavouriteFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.favourite_page, container, false);
 
-        initFavouriteLocation();
-        initSavedLocation();
-
         addButton = view.findViewById(R.id.btn_add_location);
 
-        recyclerView = view.findViewById(R.id.view_fav);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL,false));
-        recyclerView.setAdapter(favouriteAdapter);
-
+        initSavedLocation();
         recyclerView = view.findViewById(R.id.view_saved);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(),LinearLayoutManager.VERTICAL,false));
         recyclerView.setAdapter(savedLocationAdapter);
+
+        recyclerView = view.findViewById(R.id.view_fav);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL,false));
+        initFavouriteLocation();
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,13 +119,27 @@ public class FavouriteFragment extends Fragment {
         dialog.show();
     }
 
-    void initFavouriteLocation()
+    public static void initFavouriteLocation()
     {
-        ArrayList<PopularDomain> items = new ArrayList<>();
-        //items.add(new PopularDomain("Nha Trang Beach","Nha Trang","Beautiful beach","popular_pic",3.9f));
-        //items.add(new PopularDomain("Hue Capital","Hue","Beautiful beach","hue",3.5f));
-        //items.add(new PopularDomain("Ha Long Bay","Quang Ninh","Beautiful beach","vhl",4.0f));
-        favouriteAdapter = new PopularAdapter(items);
+        User user = MainActivity.getUser();
+        if(user == null) return;
+        Call<ArrayList<PopularDomain>> call = RetrofitClient.getInstance().getAPI().getFavour(user.getUserID());
+        call.enqueue(new Callback<ArrayList<PopularDomain>>() {
+            @Override
+            public void onResponse(Call<ArrayList<PopularDomain>> call, Response<ArrayList<PopularDomain>> response) {
+                if(response.body()!=null)
+                {
+                    favouriteAdapter = new PopularAdapter(response.body());
+                    recyclerView.setAdapter(favouriteAdapter);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<PopularDomain>> call, Throwable t) {
+                //Toast.makeText(this,t.toString(),Toast.LENGTH_LONG).show();
+
+            }
+        });
     }
     void initSavedLocation()
     {

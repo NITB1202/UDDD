@@ -209,7 +209,10 @@ public class DetailActivity extends AppCompatActivity {
 
         locationID = item.getLocationID();
         titleTxt.setText(item.getName());
-        scoreTxt.setText(Float.toString(item.getAvgStar()));
+        DecimalFormat df = new DecimalFormat("#.#");
+        df.setRoundingMode(RoundingMode.HALF_UP);
+        String roundedValue = df.format(item.getAvgStar());
+        scoreTxt.setText(roundedValue);
         locationTxt.setText(item.getAddress());
         descriptionTxt.setText(item.getDescription());
         totalComment.setText("("+item.getTotalComment()+")");
