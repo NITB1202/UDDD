@@ -15,10 +15,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.uddd.API.RetrofitClient;
+import com.example.uddd.Activities.MainActivity;
 import com.example.uddd.Domains.SavedDomain;
 import com.example.uddd.R;
 
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SavedAdapter extends RecyclerView.Adapter<SavedAdapter.ViewHolder> {
 
@@ -37,7 +43,7 @@ public class SavedAdapter extends RecyclerView.Adapter<SavedAdapter.ViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull SavedAdapter.ViewHolder holder, int position) {
-        holder.savedLocationNameTxt.setText(items.get(position).getLocationName());
+        holder.savedLocationNameTxt.setText(items.get(position).getName());
         holder.savedLocationTxt.setText(items.get(position).getAddress());
         holder.subtractButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -49,9 +55,20 @@ public class SavedAdapter extends RecyclerView.Adapter<SavedAdapter.ViewHolder> 
                 builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        items.remove(position);
-                        notifyItemRemoved(position);
-                        notifyItemRangeChanged(position,items.size());
+
+                        Call<Void> call = RetrofitClient.getInstance().getAPI().deleteSaved(MainActivity.getUser().getUserID(),items.get(position).getName());
+                        call.enqueue(new Callback<Void>() {
+                            @Override
+                            public void onResponse(Call<Void> call, Response<Void> response) {
+                                items.remove(position);
+                                notifyItemRemoved(position);
+                                notifyItemRangeChanged(position,items.size());
+                            }
+
+                            @Override
+                            public void onFailure(Call<Void> call, Throwable t) {
+                            }
+                        });
                     }
                 });
                 builder.setNegativeButton("No", new DialogInterface.OnClickListener() {

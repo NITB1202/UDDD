@@ -34,7 +34,7 @@ import retrofit2.Response;
 public class FavouriteFragment extends Fragment {
     static PopularAdapter favouriteAdapter;
     static SavedAdapter savedLocationAdapter;
-    static RecyclerView recyclerView;
+    static RecyclerView favourRecyclerView, savedRecyclerView;
     ImageButton addButton;
 
     @Override
@@ -45,14 +45,13 @@ public class FavouriteFragment extends Fragment {
 
         addButton = view.findViewById(R.id.btn_add_location);
 
-        initSavedLocation();
-        recyclerView = view.findViewById(R.id.view_saved);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(),LinearLayoutManager.VERTICAL,false));
-        recyclerView.setAdapter(savedLocationAdapter);
-
-        recyclerView = view.findViewById(R.id.view_fav);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL,false));
+        favourRecyclerView = view.findViewById(R.id.view_fav);
+        favourRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(),LinearLayoutManager.HORIZONTAL,false));
         initFavouriteLocation();
+
+        savedRecyclerView = view.findViewById(R.id.view_saved);
+        savedRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(),LinearLayoutManager.VERTICAL,false));
+        initSavedLocation();
 
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,9 +82,22 @@ public class FavouriteFragment extends Fragment {
                         String location = locationBar.getText().toString();
 
                         if(checkInputInformation(location)) {
-                            SavedDomain item = new SavedDomain(locationName, location);
-                            savedLocationAdapter.addItem(item);
                             dialog.dismiss();
+
+                            //Update to database
+                            Call<Void> call = RetrofitClient.getInstance().getAPI().addSaved(MainActivity.getUser().getUserID(),locationName,location);
+                            call.enqueue(new Callback<Void>() {
+                                @Override
+                                public void onResponse(Call<Void> call, Response<Void> response) {
+                                    SavedDomain item = new SavedDomain(1,locationName, location);
+                                    savedLocationAdapter.addItem(item);
+                                }
+
+                                @Override
+                                public void onFailure(Call<Void> call, Throwable t) {
+
+                                }
+                            });
                         }
                         else
                             showErrorMessage();
@@ -121,16 +133,14 @@ public class FavouriteFragment extends Fragment {
 
     public static void initFavouriteLocation()
     {
-        User user = MainActivity.getUser();
-        if(user == null) return;
-        Call<ArrayList<PopularDomain>> call = RetrofitClient.getInstance().getAPI().getFavour(user.getUserID());
+        Call<ArrayList<PopularDomain>> call = RetrofitClient.getInstance().getAPI().getFavour(MainActivity.getUser().getUserID());
         call.enqueue(new Callback<ArrayList<PopularDomain>>() {
             @Override
             public void onResponse(Call<ArrayList<PopularDomain>> call, Response<ArrayList<PopularDomain>> response) {
                 if(response.body()!=null)
                 {
                     favouriteAdapter = new PopularAdapter(response.body());
-                    recyclerView.setAdapter(favouriteAdapter);
+                    favourRecyclerView.setAdapter(favouriteAdapter);
                 }
             }
 
@@ -141,12 +151,27 @@ public class FavouriteFragment extends Fragment {
             }
         });
     }
-    void initSavedLocation()
+    public void initSavedLocation()
     {
-        ArrayList<SavedDomain> items = new ArrayList<>();
-        items.add(new SavedDomain("Home","23A Tran Van Duat, district 3, HCM city"));
-        items.add(new SavedDomain("Work","90D Ho Van Loi, district 2, HCM city"));
-        savedLocationAdapter = new SavedAdapter(items);
+        User user = MainActivity.getUser();
+        if(user == null) return;
+        Call<ArrayList<SavedDomain>> call = RetrofitClient.getInstance().getAPI().getSavedLocation(user.getUserID());
+        call.enqueue(new Callback<ArrayList<SavedDomain>>() {
+            @Override
+            public void onResponse(Call<ArrayList<SavedDomain>> call, Response<ArrayList<SavedDomain>> response) {
+                if(response.body()!=null)
+                {
+                    savedLocationAdapter = new SavedAdapter(response.body());
+                    savedRecyclerView.setAdapter(savedLocationAdapter);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<SavedDomain>> call, Throwable t) {
+                //Toast.makeText(this,t.toString(),Toast.LENGTH_LONG).show();
+
+            }
+        });
     }
 
     @Override

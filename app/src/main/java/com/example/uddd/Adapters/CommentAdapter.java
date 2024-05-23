@@ -89,9 +89,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
                     call.enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
-                            //holder.likeButton.setBackgroundResource(R.drawable.thumbs_up_blue_24px);
-                            holder.num_like.setText("("+String.valueOf(items.get(position).getLikes()+1)+")");
-                            //DetailActivity.updateComment();
+                            items.get(position).setLikes(items.get(position).getLikes()+1);
+                            holder.num_like.setText("("+String.valueOf(items.get(position).getLikes())+")");
                         }
                         @Override
                         public void onFailure(Call<Void> call, Throwable t) {
@@ -105,9 +104,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
                     call.enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
-                            holder.likeButton.setBackgroundResource(R.drawable.thumbs_up_24px);
-                            holder.num_like.setText("("+String.valueOf(items.get(position).getLikes()-1)+")");
-                            DetailActivity.updateComment();
+                            items.get(position).setLikes(items.get(position).getLikes()-1);
+                            holder.num_like.setText("("+String.valueOf(items.get(position).getLikes())+")");
                         }
 
                         @Override
@@ -128,9 +126,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
                     call.enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
-                            //DetailActivity.updateComment();
-                            //holder.dislikeButton.setBackgroundResource(R.drawable.thumbs_down_blue_24px);
-                            holder.num_dislike.setText("("+String.valueOf(items.get(position).getDislikes()+1)+")");
+                            items.get(position).setDislikes(items.get(position).getDislikes()+1);
+                            holder.num_dislike.setText("("+String.valueOf(items.get(position).getDislikes())+")");
                         }
                         @Override
                         public void onFailure(Call<Void> call, Throwable t) {
@@ -144,8 +141,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ViewHold
                     call.enqueue(new Callback<Void>() {
                         @Override
                         public void onResponse(Call<Void> call, Response<Void> response) {
-                            holder.dislikeButton.setBackgroundResource(R.drawable.thumbs_down_24px);
-                            holder.num_dislike.setText("("+String.valueOf(items.get(position).getDislikes()-1)+")");
+                            items.get(position).setDislikes(items.get(position).getDislikes()-1);
+                            holder.num_dislike.setText("("+String.valueOf(items.get(position).getDislikes())+")");
                             DetailActivity.updateComment();
                         }
                         @Override

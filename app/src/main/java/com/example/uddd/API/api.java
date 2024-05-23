@@ -2,12 +2,14 @@ package com.example.uddd.API;
 
 import com.example.uddd.Domains.CommentDomain;
 import com.example.uddd.Domains.PopularDomain;
+import com.example.uddd.Domains.SavedDomain;
 import com.example.uddd.Models.PlacesInfo;
 import com.example.uddd.Models.User;
 
 import java.util.ArrayList;
 
 import retrofit2.Call;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -132,6 +134,22 @@ public interface api {
     Call<Void> addFavour(
             @Query("userID") int userID,
             @Query("locationID") int locationID
+    );
+    @GET("/api/getSavedLocation")
+    Call<ArrayList<SavedDomain>> getSavedLocation(
+            @Query("userID") int userID
+    );
+
+    @POST("/api/addSavedLocation")
+    Call<Void> addSaved(
+            @Query("userID") int userID,
+            @Query("name") String name,
+            @Query("address") String address
+    );
+    @DELETE("/api/deleteSaved")
+    Call<Void> deleteSaved(
+            @Query("userID") int userID,
+            @Query("name") String name
     );
 
 }

@@ -3,20 +3,30 @@ package com.example.uddd.Domains;
 import java.io.Serializable;
 
 public class SavedDomain implements Serializable {
-    private String locationName;
+    private int userID;
+    private String name;
     private String address;
 
-    public SavedDomain(String locationName, String address) {
-        this.locationName = locationName;
+    public SavedDomain(int userID, String name, String address) {
+        this.userID = userID;
+        this.name = name;
         this.address = address;
     }
 
-    public String getLocationName() {
-        return locationName;
+    public int getUserID() {
+        return userID;
     }
 
-    public void setLocationName(String locationName) {
-        this.locationName = locationName;
+    public void setUserID(int userID) {
+        this.userID = userID;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getAddress() {

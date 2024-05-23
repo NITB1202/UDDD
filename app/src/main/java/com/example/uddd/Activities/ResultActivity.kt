@@ -454,7 +454,6 @@ class ResultActivity : AppCompatActivity()
                                         jsonObject.put("Name: ",info.features[i].properties.name)
 
 
-
                                         val pointAnnotationOptions: PointAnnotationOptions =
                                             PointAnnotationOptions().withPoint(
                                                 Point.fromLngLat(longitude, latitude)
@@ -486,7 +485,6 @@ class ResultActivity : AppCompatActivity()
 
                 }
             }
-
             filters.add(button)
         }
 
